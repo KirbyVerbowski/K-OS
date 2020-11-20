@@ -3,7 +3,7 @@
 
 #Can be downloaded from http://littleosbook.github.com/files/stage2_eltorito
 #Should be placed in the iso/boot/grub
-stage2_eltorio
+stage2_eltorito
 
 #For files related to bochs
 *.txt
