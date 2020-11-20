@@ -13,5 +13,7 @@ int main(void)
 			}
 		}
 	}
+	
+	move_fb_cursor(5, 0);
 	return 0;
 }
