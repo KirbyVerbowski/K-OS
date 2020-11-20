@@ -1,7 +1,8 @@
-OBJECTS = loader.o kmain.o
+OBJECTS = loader.o kstdlib.o kmain.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
+DEPEND = ./header
 LDFLAGS = -T link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
@@ -27,7 +28,7 @@ run: os.iso
 	bochs -f bochsrc.txt -q
 
 %.o: %.c
-	$(CC) $(CFLAGS)  $< -o $@
+	$(CC) $(CFLAGS) -I $(DEPEND)  $< -o $@
 
 %.o: %.s
 	$(AS) $(ASFLAGS) $< -o $@

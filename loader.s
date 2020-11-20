@@ -1,16 +1,31 @@
 global loader
+extern main		; kmain.c : int main(void) 
 
-    MAGIC_NUMBER    equ 0x1BADB002      ; GRUB looks for this number
-    FLAGS           equ 0x0     
-    CHECKSUM        equ -MAGIC_NUMBER
+MAGIC_NUMBER		equ 0x1BADB002          ; GRUB looks for this number
+FLAGS   	        equ 0x0     			; No flags
+CHECKSUM			equ -MAGIC_NUMBER
+KERNEL_STACK_SIZE	equ 4096				; Bytes allocated for C stack
 
-    section .text:                  
-    align 4
-        dd MAGIC_NUMBER                 ; Write values to machine code
-        dd FLAGS
-        dd CHECKSUM
+section .bss
+	align 4
+	kernel_stack:
+		resb KERNEL_STACK_SIZE				; Reserve memory for stack
 
-    loader:
-        mov eax, 0xFADEDDAB             ; Funny number for verification
-    .loop:                              ; No further instructions
-        jmp .loop       
+section .text                
+	align 4
+    dd MAGIC_NUMBER  		               	; Write values
+    dd FLAGS
+    dd CHECKSUM
+
+
+
+	loader:
+		mov esp, kernel_stack + KERNEL_STACK_SIZE	; Initialize stack pointers
+		mov ebp, esp
+
+		call main
+		jmp .loop
+	
+		
+	.loop:                                  		; Idle forever
+		    jmp .loop       
