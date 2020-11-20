@@ -1,9 +1,17 @@
 # K-OS
 
 32-bit operating system targeting x86 archetecture
+
+To compile, link, and generate a bootable ISO: (Assuming you have the dependencies installed - NASM, genisoimage, gcc, ld)
+ `make all`
+ 
+To do above and run (Above dependencies + Bochs)
+ `make run`
+
+
 Assembly is written in Intel syntax for the NASM compiler producing 32-bit ELF
 C is targetting GCC 
-OS will be loaded by GRUB (because I don't want to write a bootloader)
+OS will be loaded by GRUB legacy (because I don't want to write a bootloader)
 motivating most of the above choices
 
 11/19/2020
