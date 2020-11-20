@@ -1,9 +1,9 @@
-OBJECTS = loader.o kstdlib.o kmain.o
+OBJECTS = src/loader.o src/kstdlib.o src/kmain.o
 CC = gcc
 CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
 DEPEND = ./header
-LDFLAGS = -T link.ld -melf_i386
+LDFLAGS = -T src/link.ld -melf_i386
 AS = nasm
 ASFLAGS = -f elf
 
