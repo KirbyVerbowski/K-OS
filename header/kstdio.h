@@ -1,5 +1,5 @@
-#ifndef HEADER_kstdlib
-#define HEADER_kstdlib
+#ifndef HEADER_kstdio
+#define HEADER_kstdio
 
 #define FB_BLACK		0
 #define FB_BLUE			1
@@ -22,29 +22,29 @@
 #define FB_ROWS 25
 
 /*Write the specified character to the framebuffer cell at position (x, y) using specified colors
- *Implemented in kstdlib_s.s
+ *Implemented in kstdio_s.s
  *Returns: 0 if successful, 1 if x out of bounds, 2 if y is out of bounds
  */
 extern int write_fb_cell(unsigned short int x, unsigned short int y, char character, unsigned char bg, unsigned char fg);
 
 /*Move the framebuffer cursor to the specified position (x, y)
- *Implemented in kstdlib_s.s
+ *Implemented in kstdio_s.s
  *Returns: 0 if successful, 1 if x out of bounds, 2 if y is out of bounds
  */
 extern int set_fb_cursor(unsigned short int x, unsigned short int y);
 
 /*Get the framebuffer curor position ( = y * FB_COLS + x)
- *Implemented in kstdlib_s.s
+ *Implemented in kstdio_s.s
  */
 extern int get_fb_cursor(void);
 
 /*Write c to the framebuffer at the current cursor position, and advance the cursor
- *Implemented in kstdlib_c.c
+ *Implemented in kstdio_c.c
  */
 void putch(char c);
 
 /*Write string to framebuffer at current cursor position. Cursor is advanced to cell after last character
- *Implemented in kstdlib_c.c;
+ *Implemented in kstdio_c.c;
  */
 void puts(char* c);
 

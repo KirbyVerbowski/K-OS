@@ -1,4 +1,4 @@
-#include "../header/kstdlib.h"
+#include "../header/kstdio.h"
 
 void putch(char c)
 {
