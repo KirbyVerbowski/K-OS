@@ -4,8 +4,10 @@ global write_fb_cell			; void write_fb_cell(unsigned short int xpos,
 								;					 unsigned char bg,
 								;					 unsigned char fg);
 								
-global move_fb_cursor			; void move_fb_cursor(unsigned short int xpos,
-								; 						unsigned short int ypos,
+global set_fb_cursor			; void set_fb_cursor(unsigned short int xpos,
+								; 						unsigned short int ypos);
+								
+global get_fb_cursor			; void get_fb_cursor(void);
 
 FRAMEBUFFER		equ 0x000B8000	; Location of the framebuffer in memory
 CELL_SIZE		equ 2			; Framebuffer memory is split into 16-bit cells
@@ -59,7 +61,7 @@ section .text
 		jmp cleanup
 		
 		
-	move_fb_cursor:
+	set_fb_cursor:
 		; Check parameter validity, don't want to write to non-fb memory
 		
 		mov  ebx, [esp + 4] 	; Fetch x
@@ -99,7 +101,29 @@ section .text
 		
 		mov eax, 0				; No errors- return 0
 		jmp cleanup
-			
+		
+	get_fb_cursor:
+		mov  dx, FB_DESC_PORT	; Set data port to high cursor byte
+		mov  al, CURS_POS_H
+		out  dx, al
+		
+		mov  dx, FB_DATA_PORT	; Grab the high byte
+		in   al, dx
+		shl  ax, 4
+		mov  bx, ax				; Temporarily store in bx
+		
+		mov  dx, FB_DESC_PORT	; Set data port to low cursor byte
+		mov  al, CURS_POS_L
+		out  dx, al			
+		
+		mov  dx, FB_DATA_PORT	
+		mov  ax, bx				; Restore the high cursor byte into ax
+		in   al, dx				; Finally get the low cursor byte in al
+		
+		ret
+		
+	cleanup:
+		ret			
 		
 	err_arg_x:
 		mov  eax, 1
@@ -109,8 +133,7 @@ section .text
 		jmp  cleanup
 		
 		
-	cleanup:
-		ret
+
 		
 		
 	
