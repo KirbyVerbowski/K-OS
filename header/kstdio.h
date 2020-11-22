@@ -21,31 +21,46 @@
 #define FB_COLS	80
 #define FB_ROWS 25
 
+#define FB_DATA_PORT    0x03D5
+#define FB_DESC_PORT	0x03D4
+#define FB_CURS_POS_H	0x0E
+#define FB_CURS_POS_L   0x0F
+
+/*Write value to I/O port
+ *Implemented in kstdio_s.s
+ */
+extern void set_io(unsigned short port, unsigned char value);
+
+/*Read value from I/O port
+ *Implemented in kstdio_s.s
+ */
+extern unsigned char get_io(unsigned short port);
+
 /*Write the specified character to the framebuffer cell at position (x, y) using specified colors
  *Implemented in kstdio_s.s
  *Returns: 0 if successful, 1 if x out of bounds, 2 if y is out of bounds
  */
-extern int write_fb_cell(unsigned short int x, unsigned short int y, char character, unsigned char bg, unsigned char fg);
+extern int write_fb_cell(unsigned short x, unsigned short y, char character, unsigned char bg, unsigned char fg);
 
 /*Move the framebuffer cursor to the specified position (x, y)
- *Implemented in kstdio_s.s
  *Returns: 0 if successful, 1 if x out of bounds, 2 if y is out of bounds
  */
-extern int set_fb_cursor(unsigned short int x, unsigned short int y);
+int set_fb_cursor(unsigned char x, unsigned char y);
 
 /*Get the framebuffer curor position ( = y * FB_COLS + x)
- *Implemented in kstdio_s.s
  */
-extern int get_fb_cursor(void);
+unsigned short get_fb_cursor(void);
 
 /*Write c to the framebuffer at the current cursor position, and advance the cursor
- *Implemented in kstdio_c.c
  */
-void putch(char c);
+void putch(unsigned char c);
 
 /*Write string to framebuffer at current cursor position. Cursor is advanced to cell after last character
- *Implemented in kstdio_c.c;
  */
 void puts(char* c);
+
+/*Like puts but for an int. 'format' dictates how the int is displayed. (d=decimal, x=hex, b=binary. Prefix with 0 for leading zeros)
+ */
+void putint(unsigned int x, char* format);
 
 #endif

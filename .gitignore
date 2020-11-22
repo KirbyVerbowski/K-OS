@@ -10,3 +10,5 @@ stage2_eltorito
 
 #Executable disk image
 *.iso
+
+.vscode
