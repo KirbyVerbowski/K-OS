@@ -1,5 +1,5 @@
 global loader
-extern main		; kmain.c : int main(void) 
+extern kmain		; kmain.c : int kmain() 
 
 MAGIC_NUMBER		equ 0x1BADB002          ; GRUB looks for this number
 FLAGS   	        equ 0x0     			; No flags
@@ -23,7 +23,7 @@ section .text
 		mov esp, kernel_stack + KERNEL_STACK_SIZE	; Initialize stack pointers
 		mov ebp, esp
 
-		call main
+		call kmain
 		jmp .loop
 	
 		

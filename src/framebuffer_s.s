@@ -3,10 +3,7 @@ global write_fb_cell			; void write_fb_cell(unsigned short int xpos,
 								;					 char character,
 								;					 unsigned char bg,
 								;					 unsigned char fg);
-								
-global set_io					; void set_io(unsigned short int port, unsigned char value);
-
-global get_io					; unsigned char get_io(unsigned short int port);
+							
 
 FRAMEBUFFER		equ 0x000B8000	; Location of the framebuffer in memory
 CELL_SIZE		equ 2			; Framebuffer memory is split into 16-bit cells
@@ -54,18 +51,6 @@ section .text
 		
 		mov  eax, 0			; No errors- will be returning 0
 		jmp cleanup
-
-	set_io:
-		mov  eax, [esp + 8]
-		mov  edx, [esp + 4]
-		out  dx, al
-		ret
-
-	get_io:
-		mov  edx, [esp + 4]
-		mov  eax, 0
-		in   al, dx
-		ret
 		
 	cleanup:
 		ret			
@@ -76,9 +61,3 @@ section .text
 	err_arg_y:
 		mov  eax, 2
 		jmp  cleanup
-		
-		
-
-		
-		
-	

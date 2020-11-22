@@ -1,5 +1,5 @@
-#ifndef HEADER_kstdio
-#define HEADER_kstdio
+#ifndef HEADER_framebuffer
+#define HEADER_framebuffer
 
 #define FB_BLACK		0
 #define FB_BLUE			1
