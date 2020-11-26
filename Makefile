@@ -1,6 +1,6 @@
-OBJECTS = src/loader.o src/kmain.o src/io.o src/framebuffer_c.o src/framebuffer_s.o src/string.o
+OBJECTS = src/loader.o src/kmain.o src/io.o src/framebuffer_c.o src/framebuffer_s.o src/string.o src/setup_mem.o
 CC = gcc
-CFLAGS = -m32 -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
+CFLAGS = -m32 -masm=intel -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
 		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
 LDFLAGS = -T src/link.ld -melf_i386
 AS = nasm
