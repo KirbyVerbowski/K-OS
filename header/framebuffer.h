@@ -26,16 +26,6 @@
 #define FB_CURS_POS_H	0x0E
 #define FB_CURS_POS_L   0x0F
 
-/*Write value to I/O port
- *Implemented in kstdio_s.s
- */
-extern void set_io(unsigned short port, unsigned char value);
-
-/*Read value from I/O port
- *Implemented in kstdio_s.s
- */
-extern unsigned char get_io(unsigned short port);
-
 /*Write the specified character to the framebuffer cell at position (x, y) using specified colors
  *Implemented in kstdio_s.s
  *Returns: 0 if successful, 1 if x out of bounds, 2 if y is out of bounds

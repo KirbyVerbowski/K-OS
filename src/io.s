@@ -1,27 +1,72 @@
-global set_io					; void set_io(unsigned short int port, unsigned char value);
+global outb						; void outb(unsigned short int port, unsigned char value);
 
-global get_io					; unsigned char get_io(unsigned short int port);
+global inb						; unsigned char inb(unsigned short int port);
+
+global outw
+
+global inw
+
+global outd
+
+global ind
 
 global load_gdt                 ; void load_gdt(struct gdt *table);
 
+global getstackptr				; char * getstackptr();
+
+global load_idt					; void load_idt(char * tableptr);
+
 section .text
-    set_io:
+	load_idt:
+		mov  eax, [esp + 4]
+		lidt [eax]
+		ret
+
+	getstackptr:
+        mov eax, esp
+        add eax, 4      ; ret will take 4 bytes off the stack
+        ret
+		
+    outb:
 		mov  eax, [esp + 8]
 		mov  edx, [esp + 4]
 		out  dx, al
 		ret
 
-	get_io:
+	inb:
 		mov  edx, [esp + 4]
 		mov  eax, 0
 		in   al, dx
+		ret
+
+	outw:
+		mov  eax, [esp + 8]
+		mov  edx, [esp + 4]
+		out  dx, ax
+		ret
+
+	inw:
+		mov  edx, [esp + 4]
+		mov  eax, 0
+		in   ax, dx
+		ret
+
+	outd:
+		mov  eax, [esp + 8]
+		mov  edx, [esp + 4]
+		out  dx, eax
+		ret
+
+	ind:
+		mov  edx, [esp + 4]
+		in   eax, dx
 		ret
 
     load_gdt:
         cli 
         mov  eax, [esp + 4]
         lgdt [eax]                      ; Load the gdt passed by parameter
-		
+
 		mov eax, cr0
 		or al, 1
 		mov cr0, eax
@@ -31,7 +76,6 @@ section .text
 		mov ds, ax						; Set up data segment selectors (Kernel privilege)
 		mov ss, ax
 
-
 		mov es, ax
 		mov fs, ax
 		mov gs, ax
@@ -40,3 +84,4 @@ section .text
 	flush_cs:
         sti
         ret
+

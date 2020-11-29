@@ -10,21 +10,21 @@ int set_fb_cursor(unsigned char x, unsigned char y)
 
 	int curs_pos = (y * FB_COLS) + x;
 
-	set_io(FB_DESC_PORT, FB_CURS_POS_H);
-	set_io(FB_DATA_PORT, (unsigned char)((curs_pos & 0xFF00) >> 8));
-	set_io(FB_DESC_PORT, FB_CURS_POS_L);
-	set_io(FB_DATA_PORT, (unsigned char)(curs_pos & 0xFF));
+	outb(FB_DESC_PORT, FB_CURS_POS_H);
+	outb(FB_DATA_PORT, (unsigned char)((curs_pos & 0xFF00) >> 8));
+	outb(FB_DESC_PORT, FB_CURS_POS_L);
+	outb(FB_DATA_PORT, (unsigned char)(curs_pos & 0xFF));
 
 	return 0;
 }
 
 unsigned short get_fb_cursor(void)
 {
-	set_io(FB_DESC_PORT, FB_CURS_POS_H);
-	unsigned short res = get_io(FB_DATA_PORT);
+	outb(FB_DESC_PORT, FB_CURS_POS_H);
+	unsigned short res = inb(FB_DATA_PORT);
 	res = res << 8;
-	set_io(FB_DESC_PORT, FB_CURS_POS_L);
-	res |= get_io(FB_DATA_PORT);
+	outb(FB_DESC_PORT, FB_CURS_POS_L);
+	res |= inb(FB_DATA_PORT);
 	return res;
 }
 

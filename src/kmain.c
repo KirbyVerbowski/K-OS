@@ -1,6 +1,72 @@
 #include "../header/framebuffer.h"
 #include "../header/string.h"
 #include "../header/io.h"
+#include "../header/heap.h"
+#include "../header/interrupt.h"
+#include "../header/keyboard.h"
+
+
+int kmain(char * idt_location, char * gdt_location)
+{	
+
+	/* Fill the screen with pink checkerboard pattern */
+	for(int x = 0; x < 80; x++)
+	{
+		for(int y = 0; y < 25; y++)
+		{
+			if(y % 2){
+				if(x % 2)
+					write_fb_cell(x, y, ' ', FB_LIGHTMAGENTA, FB_BLACK);
+				else
+					write_fb_cell(x, y, ' ', FB_BLACK, FB_WHITE);
+			}
+			else
+			{
+				if(!(x % 2))
+					write_fb_cell(x, y, ' ', FB_LIGHTMAGENTA, FB_BLACK);
+				else
+					write_fb_cell(x, y, ' ', FB_BLACK, FB_WHITE);
+			}
+
+		}
+	}
+	set_fb_cursor(0, 0);
+	char welcomeMsg[] = "Enter some text: ";
+	puts(welcomeMsg);
+
+	//setup_gdt(gdt_location);
+
+	/* Set up the interrupt hanler */
+	generate_idt((unsigned int *)idt_location);
+	struct gdt idt_header = {
+		.size = 2048,
+		.address = (unsigned int)idt_location
+	};
+	load_idt(&idt_header);
+
+	/* Set up the '''heap''' */
+	heap_init(gdt_location + GDT_MAXSIZE);	
+	
+
+	/* Set up the PIC and related hardware */
+	//Point the PIC interrupts at our interrupt handler
+	PIC_remap(PIC1_VECTOR_OFFSET, PIC2_VECTOR_OFFSET);
+	//Handle only keyboard interrupts
+	IRQ_set_mask(0xFD, 0xFF);
+	configure_keyboard();
+
+
+	//Enable timer interrupts
+	//timer_config(0x00FF);
+	//IRQ_clear_mask_bit(0);	
+
+	/* The PIC and hardware have been configured, now use them */
+	asm("sti");	
+
+	return 0;
+}
+
+/* Currently unused  */
 
 void set_gdt_entry(char *table_start, unsigned short byteIndex, struct segment_descriptor segment)
 {
@@ -24,20 +90,20 @@ void set_gdt_info(struct gdt *table_start, unsigned short no_entries)
 	table_start->size = 8 * no_entries;
 }
 
-int kmain(char *table_location)
-{	
+void setup_gdt(char * gdt_location)
+{
 	struct segment_descriptor datadesc = {
 		.base_l = 0x0000,	.base_m = 0x00,	.base_h = 0,
-		.limit_l = 0x0103,
+		.limit_l = 0xFFFF,
 		.flags = 0x93,
-		.limit_h_flags = 0xE0
+		.limit_h_flags = 0xCF
 	};
 
 	struct segment_descriptor codedesc = {
 		.base_l = 0,	.base_m = 0,	.base_h = 0,
-		.limit_l = 0x0103,
+		.limit_l = 0xFFFF,
 		.flags = 0x9B,
-		.limit_h_flags = 0xE0
+		.limit_h_flags = 0xCF
 	};
 
 	struct segment_descriptor nulldesc = {
@@ -47,58 +113,10 @@ int kmain(char *table_location)
 		.limit_h_flags = 0
 	};
 
-	set_gdt_info((struct gdt *)table_location, 3);
-	set_gdt_entry(table_location, 0x0000, nulldesc);
-	set_gdt_entry(table_location, 0x0008, codedesc);
-	set_gdt_entry(table_location, 0x0010, datadesc);
+	set_gdt_info((struct gdt *)gdt_location, 3);
+	set_gdt_entry(gdt_location, 0x0000, nulldesc);
+	set_gdt_entry(gdt_location, 0x0008, codedesc);
+	set_gdt_entry(gdt_location, 0x0010, datadesc);
 	
-	load_gdt((struct gdt *)table_location);
-
-	/* Fill the screen with ' ' on a green background */
-	for(int x = 0; x < 80; x++)
-	{
-		for(int y = 0; y < 25; y++)
-		{
-			if(y % 2){
-				if(x % 2)
-					write_fb_cell(x, y, ' ', FB_LIGHTMAGENTA, FB_BLACK);
-				else
-					write_fb_cell(x, y, ' ', FB_BLACK, FB_WHITE);
-			}
-			else
-			{
-				if(!(x % 2))
-					write_fb_cell(x, y, ' ', FB_LIGHTMAGENTA, FB_BLACK);
-				else
-					write_fb_cell(x, y, ' ', FB_BLACK, FB_WHITE);
-			}
-
-		}
-	}
-
-	set_fb_cursor(0, 0);
-
-	//int myint = 11;
-	char* text = "text";
-	char stext[] = "text";
-	//int a = 0;
-	//int b = 0;
-	char str[12];
-	//char bin[36];
-	char longstr[21] = "Hello world !!!11!!1";
-	
-	to_string(str, (int)text, FORMAT_HEX_UPRCASE_PAD);
-	puts(str);
-	set_fb_cursor(0, 1);
-	to_string(str, (int)stext, FORMAT_HEX_UPRCASE_PAD);
-	puts(str);
-	
-	set_fb_cursor(0, 5);
-	puts(longstr);
-
-	set_fb_cursor(0, 7);
-	//This causes a 'segfault' because its stored in a very high memory address
-	//putch(*text);
-
-	return 0;
+	load_gdt((struct gdt *)gdt_location);
 }
