@@ -4,10 +4,18 @@
 #include "../header/heap.h"
 #include "../header/interrupt.h"
 #include "../header/keyboard.h"
+#include "../header/stdio.h"
+#include "../header/kernel.h"
 
 
 int kmain(char * idt_location, char * gdt_location)
 {	
+	KeyEvent * keyEvent = (KeyEvent *)KEYBUF;
+	keyEvent->ASCII = 0;
+	keyEvent->key = 0;
+	keyEvent->modifiers = 0;
+	unsigned char * mod = (unsigned char *)KEYMOD;
+	*mod = 0;
 
 	/* Fill the screen with pink checkerboard pattern */
 	for(int x = 0; x < 80; x++)
@@ -31,7 +39,7 @@ int kmain(char * idt_location, char * gdt_location)
 		}
 	}
 	set_fb_cursor(0, 0);
-	char welcomeMsg[] = "Enter some text: ";
+	char welcomeMsg[] = "Press any key: ";
 	puts(welcomeMsg);
 
 	//setup_gdt(gdt_location);
@@ -62,6 +70,16 @@ int kmain(char * idt_location, char * gdt_location)
 
 	/* The PIC and hardware have been configured, now use them */
 	asm("sti");	
+
+	int y = 1;
+
+	while(1){
+		set_fb_cursor(0, (y++ % FB_ROWS));
+		char key = getch();	
+		char msg[] = "You pressed: ";
+		puts(msg);
+		putch(key);
+	}
 
 	return 0;
 }

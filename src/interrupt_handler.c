@@ -41,12 +41,9 @@ void interrupt_handler(unsigned int interrupt, unsigned int errorcode)
     if(interrupt >= PIC1_VECTOR_OFFSET && interrupt < PIC2_VECTOR_OFFSET + 8)
     {      
         //Keyboard interrupt
-        if(interrupt == PIC1_VECTOR_OFFSET+1){
-            PIC_sendEOI(interrupt - PIC1_VECTOR_OFFSET);
-            //print the typed key if it has an ASCII encoding
-            char ascii = read_ASCII();       
-            if(ascii)     
-                putch(ascii);
+        if(interrupt == PIC1_VECTOR_OFFSET+1){            
+            handle_keypress();
+			PIC_sendEOI(1);
         }
 
     }
