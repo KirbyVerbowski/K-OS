@@ -2,6 +2,7 @@
 #include "../header/io.h"
 #include "../header/framebuffer.h"
 #include "../header/keyboard.h"
+#include "../header/string.h"
 
 #define ICW1_ICW4	    0x01		/* ICW4 (not) needed */
 #define ICW1_SINGLE	    0x02		/* Single (cascade) mode */
@@ -31,11 +32,12 @@
 
 void interrupt_handler(unsigned int interrupt, unsigned int errorcode)
 {
-    //Write out the values for debug
-    unsigned int * sti = (unsigned int *)0x00200000;
-    unsigned int * ste = (unsigned int *)0x00200004;
-    *ste = errorcode;
-    *sti = interrupt;
+    //No need to write values, get them from the stack
+    //unsigned int * sti = (unsigned int *)0x00200000;
+    //unsigned int * ste = (unsigned int *)0x00200004;
+    //*ste = errorcode;
+    //*sti = interrupt;
+	errorcode += 0;
 
     //PIC interrupt
     if(interrupt >= PIC1_VECTOR_OFFSET && interrupt < PIC2_VECTOR_OFFSET + 8)
@@ -47,6 +49,16 @@ void interrupt_handler(unsigned int interrupt, unsigned int errorcode)
         }
 
     }
+	else if(interrupt == 0xE)	/* Page fault */
+	{
+		char str[] = "Page fault. errorcode: ";
+		puts(str);
+		char buf[64];
+		to_string(buf, errorcode, FORMAT_HEX_UPRCASE_PAD);
+		puts(buf);
+
+		DEBUG_BREAKPOINT();
+	}
     else{
         //Interrupt came from an unknown source
         DEBUG_BREAKPOINT();

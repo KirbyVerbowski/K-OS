@@ -69,7 +69,7 @@ int kmain(char * idt_location, char * gdt_location)
 	//IRQ_clear_mask_bit(0);	
 
 	/* The PIC and hardware have been configured, now use them */
-	asm("sti");	
+	asm("sti");
 
 	int y = 1;
 
