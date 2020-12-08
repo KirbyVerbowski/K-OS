@@ -1,6 +1,10 @@
 #ifndef HEADER_keyboard
 #define HEADER_keyboard
 
+#ifndef HEADER_kernel
+#include "kernel.h"
+#endif
+
 #define BUFMASK_PRESSED 0x80
 #define BUFMASK_LCTRL 0x20
 #define BUFMASK_RCTRL 0x10
@@ -11,6 +15,14 @@
 #define BUFMASK_CTRL (BUFMASK_LCTRL | BUFMASK_RCTRL)
 #define BUFMASK_SHFT (BUFMASK_LSHFT | BUFMASK_RSHFT)
 #define BUFMASK_ALT (BUFMASK_LALT | BUFMASK_RALT)
+
+//KeyEvent struct
+#define KEYBUF (0x00200000 + KERNEL_OFFSET)
+/** Buffer of held modifier keys:
+  * Bit  |   7    |6|  5  |  4  |  3 |  2 |  1 |  0
+  *       Pressed? 0 LCTRL RCTRL LSFT RSFT LALT RALT
+  */
+#define KEYMOD (0x00200006 + KERNEL_OFFSET)
 
 typedef enum KeyCode
 {
@@ -25,7 +37,7 @@ typedef enum KeyCode
 //6 bytes
 typedef struct KeyEvent
 {
-	KeyCode key;
+	unsigned int keyCode;
 	unsigned char ASCII;
 	unsigned char modifiers;
 }__attribute__((packed)) KeyEvent;

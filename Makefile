@@ -1,6 +1,6 @@
-OBJECTS = src/loader.o src/kmain.o src/io.o src/framebuffer_c.o src/framebuffer_s.o src/string.o src/setup_mem.o src/heap.o src/interrupt_setup.o src/interrupt.o src/interrupt_handler.o src/keyboard.o src/stdio.o
+OBJECTS = src/loader.o src/kmain.o src/io.o src/framebuffer_c.o src/framebuffer_s.o src/string.o src/interrupt_setup.o src/interrupt.o src/interrupt_handler.o src/keyboard.o
 CC = gcc
-CFLAGS = -m32 -masm=intel -nostdlib -nostdinc -fno-builtin -fno-stack-protector \
+CFLAGS = -m32 -masm=intel -nostdlib -nostdinc -fno-pic -fno-builtin -fno-stack-protector \
 		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c
 LDFLAGS = -T src/link.ld -melf_i386
 AS = nasm
@@ -33,4 +33,4 @@ run: os.iso
 	$(AS) $(ASFLAGS) $< -o $@
 
 clean:
-	rm -rf *.o kernel.elf os.iso
+	rm -rf src/*.o kernel.elf os.iso

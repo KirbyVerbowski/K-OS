@@ -1,18 +1,18 @@
-global write_fb_cell			; void write_fb_cell(unsigned short int xpos, 
-								; 					 unsigned short int ypos, 
-								;					 char character,
-								;					 unsigned char bg,
-								;					 unsigned char fg);
-							
+extern kernel_offset
 
-FRAMEBUFFER		equ 0x000B8000	; Location of the framebuffer in memory
-CELL_SIZE		equ 2			; Framebuffer memory is split into 16-bit cells
-LINE_WIDTH		equ 160			; 80 columns in the framebuffer
-LINE_COUNT		equ 25			; 25 rows
+FRAMEBUFFER		equ 0x000B8000+kernel_offset	; Location of the framebuffer in memory
+CELL_SIZE		equ 2							; Framebuffer memory is split into 16-bit cells
+LINE_WIDTH		equ 160							; 80 columns in the framebuffer
+LINE_COUNT		equ 25							; 25 rows
 
 section .text
+	global write_fb_cell			; void write_fb_cell(unsigned short int xpos, 
+									; 					 unsigned short int ypos, 
+									;					 char character,
+									;					 unsigned char bg,
+									;					 unsigned char fg);
+
 	write_fb_cell:
-		
 		; Check parameter validity, don't want to write to non-fb memory
 		
 		mov  ebx, [esp + 4] 	; Fetch x

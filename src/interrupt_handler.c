@@ -56,7 +56,11 @@ void interrupt_handler(unsigned int interrupt, unsigned int errorcode)
 		char buf[64];
 		to_string(buf, errorcode, FORMAT_HEX_UPRCASE_PAD);
 		puts(buf);
-
+		char addr[] = " Address: ";
+		puts(addr);
+		to_string(buf, get_CR2(), FORMAT_HEX_UPRCASE_PAD); 
+		//get_CR2();
+		puts(buf);	//Uncommenting this line causes problems
 		DEBUG_BREAKPOINT();
 	}
     else{

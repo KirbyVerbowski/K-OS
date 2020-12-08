@@ -1,4 +1,5 @@
-    extern interrupt_handler                ; void interrupt_handler(unsigned char interrupt, unsigned char errorcode);
+section .text
+	extern interrupt_handler                ; void interrupt_handler(unsigned char interrupt, unsigned char errorcode);
     
     %macro no_error_code_interrupt_handler 1
     global interrupt_handler_%1

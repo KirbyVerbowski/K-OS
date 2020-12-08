@@ -1,6 +1,10 @@
 #ifndef HEADER_framebuffer
 #define HEADER_framebuffer
 
+#ifndef HEADER_kernel
+#include "kernel.h"
+#endif
+
 #define FB_BLACK		0
 #define FB_BLUE			1
 #define FB_GREEN		2

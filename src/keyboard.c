@@ -1,6 +1,5 @@
 #include "../header/keyboard.h"
 #include "../header/io.h"
-#include "../header/kernel.h"
 
 #define PS2_CMD_PORT 0x64
 #define PS2_DATA_PORT 0x60
@@ -68,7 +67,7 @@ void handle_keypress()
 	unsigned char released = 0;
 	unsigned char ASCII = 0;
 	KeyCode pressedKey = None;
-	unsigned char modifierBuffer = *(unsigned char *)KEYMOD;
+	unsigned char modifierBuffer = *((unsigned char *)KEYMOD);
 
 	if (scanCode == SCANCODE_MOREINFO)
 	{
@@ -204,7 +203,7 @@ void handle_keypress()
 	
 	KeyEvent * keyEvent = (KeyEvent *)KEYBUF;
 	keyEvent->ASCII = ASCII;
-	keyEvent->key = pressedKey;
+	keyEvent->keyCode = pressedKey;
 	keyEvent->modifiers = modifierBuffer;
 
 	unsigned char * mod = (unsigned char *)KEYMOD;

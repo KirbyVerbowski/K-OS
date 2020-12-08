@@ -51,6 +51,11 @@ extern void outd(unsigned short port, unsigned int value);
  */
 extern unsigned int ind(unsigned short port);
 
+/*Returns the value held in Command Register 2 (page fault register)
+ *Implemented in io.s
+ */
+extern unsigned int get_CR2();
+
 /*Load the global descriptor table in to the CPU
  *Implemented in io.s
  */
