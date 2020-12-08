@@ -15,22 +15,37 @@ GDT_MAXSIZE			equ 1024				; Bytes allocated for the GDT
 IDT_SIZE			equ 2048				; Bytes allocated for the IDT
 PAGE_DIR_SIZE		equ 4096				; Bytes allocated for the Page directory table
 PAGE_TBL_SIZE		equ 4096				; Bytes allocated for a page table
+PFA_BITMAP_SIZE		equ 0x20000				; 132K needed = (0x1 0000 0000 addr. bytes) / (0x1000 byte page frames) / (0x8 bits in a byte)
+KBD_BUFF_SIZE		equ 8
 
+;
+;	Sometimes there is a boot error when setting the GDT. Rebooting seems to fix the issue
+;	Perhaps this stuff should be in a data section instead of bss
+;
 section .bss
-	align 4
+	align 4096
+
+	global pfa_bitmap
+
 	idt_start:
-		resb IDT_SIZE						; Reserve memory for the IDT				
+		resb IDT_SIZE						; Reserve memory for the IDT		
 	gdt_start:
 		resb GDT_MAXSIZE					; Reserve memory for the GDT (unused currently)
-		resb 4096 - (GDT_MAXSIZE + IDT_SIZE)	; Pad to 4KB
+	kbd_buffer:
+		resb KBD_BUFF_SIZE
+		resb (4096 - IDT_SIZE - GDT_MAXSIZE - KBD_BUFF_SIZE)		;Pad to 4k
 	page_directory:
 		resb PAGE_DIR_SIZE					; Reserve memory for the PDT
 	page_table_0:
 		resb PAGE_TBL_SIZE					; Page table for the kernel
+	pfa_bitmap:
 	identity_temp_table:							
-		resb PAGE_TBL_SIZE					; Temporarily identity map the kernel
+		resb PAGE_TBL_SIZE						; Temporarily identity map the kernel
+		resb (PFA_BITMAP_SIZE - PAGE_TBL_SIZE)  ; Since it is unmapped after paging is enabled
+												; We can reuse the memory for the PFA bitmap
 	kernel_stack:
 		resb KERNEL_STACK_SIZE				; Reserve memory for stack
+
 
 section .text                
 	align 4
@@ -61,6 +76,7 @@ section .text
 
 	paging_enabled:
 
+		
 		mov esp, kernel_stack + KERNEL_STACK_SIZE	; Paging is now enabled so this address will now point to low physical memory
 		mov ebp, esp
 
@@ -74,7 +90,10 @@ section .text
 		push ebx
 		mov ebx, idt_start
 		push ebx
+		mov ebx, kbd_buffer
+		push ebx
 		call kmain
+		pop ebx
 		pop ebx
 		pop ebx
 

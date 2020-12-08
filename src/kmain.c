@@ -4,11 +4,17 @@
 #include "../header/interrupt.h"
 #include "../header/keyboard.h"
 #include "../header/kernel.h"
+#include "../header/pageframeallocator.h"
 
 void setup_gdt(char * gdt_location);
 
-int kmain(char * idt_location, char * gdt_location)
+KeyEvent * keyboard_buffer;
+char * keyboard_modifiers;
+
+int kmain(char * kbd_buffer, char * idt_location, char * gdt_location)
 {	
+	keyboard_buffer = (KeyEvent *)kbd_buffer;
+	keyboard_modifiers = kbd_buffer + 6;
 	// Need to rewrite getch()	
 	// KeyEvent * keyEvent = (KeyEvent *)KEYBUF;
 	// keyEvent->ASCII = 0;
@@ -40,17 +46,18 @@ int kmain(char * idt_location, char * gdt_location)
 	}
 	char ok[] = "OK";
 	char err[] = "ERROR";
-	set_fb_cursor(0, 0);
+	int y = 0;
+	set_fb_cursor(0, y++);
 	char welcomeMsg[] = "K-OS boot: ";
 	puts(welcomeMsg);
 
-	set_fb_cursor(0, 1);
+	set_fb_cursor(0, y++);
 	char gdtmsg[] = "Setting GDT... ";
 	puts(gdtmsg);
 	setup_gdt(gdt_location);
 	puts(ok);
 
-	set_fb_cursor(0, 2);
+	set_fb_cursor(0, y++);
 	char idtmsg[] = "Setting IDT... ";
 	puts(idtmsg);
 	/* Set up the interrupt hanler */
@@ -63,7 +70,7 @@ int kmain(char * idt_location, char * gdt_location)
 	puts(ok);
 
 
-	set_fb_cursor(0, 3);
+	set_fb_cursor(0, y++);
 	char picmsg[] = "Configuring PIC... ";
 	puts(picmsg);
 	/* Set up the PIC and related hardware */
@@ -71,14 +78,14 @@ int kmain(char * idt_location, char * gdt_location)
 	PIC_remap(PIC1_VECTOR_OFFSET, PIC2_VECTOR_OFFSET);
 	puts(ok);
 
-	set_fb_cursor(0, 4);
+	set_fb_cursor(0, y++);
 	char pickbdmsg[] = "Setting PIC to handle keyboard only... ";
 	puts(pickbdmsg);
 	//Handle only keyboard interrupts
 	IRQ_set_mask(0xFD, 0xFF);
 	puts(ok);
 
-	set_fb_cursor(0, 5);
+	set_fb_cursor(0, y++);
 	char kbdmsg[] = "Configuring keyboard... ";
 	puts(kbdmsg);
 	if(configure_keyboard())
@@ -92,22 +99,35 @@ int kmain(char * idt_location, char * gdt_location)
 	//IRQ_clear_mask_bit(0);	
 
 	/* The PIC and hardware have been configured, now use them */
-	set_fb_cursor(0, 6);
+	set_fb_cursor(0, y++);
 	char intmsg[] = "Enabling hardware interrupts... ";
 	puts(intmsg);
 	asm("sti");
 	puts(ok);
 
-	set_fb_cursor(0, 7);
+	set_fb_cursor(0, y++);
+	char pfamsg[] = "Initializing page frame allocator... ";
+	puts(pfamsg);
+	clear_pfa_bitmap(0, 1024);
+	puts(ok);
+
+	set_fb_cursor(0, y++);
 	char completemsg[] = "Setup complete.";
 	puts(completemsg);
-	set_fb_cursor(0, 8);
+	set_fb_cursor(0, y++);
+
+	char pframe[32];
+	//This will print the first available physical address which should be 0x00400000 since 
+	//the kernel and GRUB reside in a single page table
+	to_string(pframe, allocate_frame(), FORMAT_HEX_UPRCASE_PAD);
+	puts(pframe);
+	set_fb_cursor(0, y++);
 
 
-	//Define a pointer to an address that isn't present
-	int * x = (int *)0x00000045;
-	//This will cause a page fault
-	*x = 3;
+
+	while(1){
+		putch(getch());
+	}
 
 	return 0;
 }

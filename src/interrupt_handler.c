@@ -32,13 +32,6 @@
 
 void interrupt_handler(unsigned int interrupt, unsigned int errorcode)
 {
-    //No need to write values, get them from the stack
-    //unsigned int * sti = (unsigned int *)0x00200000;
-    //unsigned int * ste = (unsigned int *)0x00200004;
-    //*ste = errorcode;
-    //*sti = interrupt;
-	errorcode += 0;
-
     //PIC interrupt
     if(interrupt >= PIC1_VECTOR_OFFSET && interrupt < PIC2_VECTOR_OFFSET + 8)
     {      
@@ -59,8 +52,7 @@ void interrupt_handler(unsigned int interrupt, unsigned int errorcode)
 		char addr[] = " Address: ";
 		puts(addr);
 		to_string(buf, get_CR2(), FORMAT_HEX_UPRCASE_PAD); 
-		//get_CR2();
-		puts(buf);	//Uncommenting this line causes problems
+		puts(buf);
 		DEBUG_BREAKPOINT();
 	}
     else{

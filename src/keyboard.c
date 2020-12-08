@@ -1,5 +1,6 @@
 #include "../header/keyboard.h"
 #include "../header/io.h"
+#include "../header/kernel.h"
 
 #define PS2_CMD_PORT 0x64
 #define PS2_DATA_PORT 0x60
@@ -23,16 +24,8 @@
 #define MIN_TYPEMATIC_INTERVAL 0x00 /* 30Hz repeat rate, 250ms delay before repeat */
 
 
-
 #define SCANCODE_MOREINFO 0xE0
 
-/** Buffer of held modifier keys:
-  * Bit  |   7    |6|  5  |  4  |  3 |  2 |  1 |  0
-  *       Pressed? 0 LCTRL RCTRL LSFT RSFT LALT RALT
-  */
-//char modifierBuffer = 0x00;
-
-//KeyEvent keyEvent = { .key = None, .ASCII = 0, .modifiers = 0};
 
 KeyCode SingleScan2KeyCode[128] = 
 {
@@ -67,7 +60,7 @@ void handle_keypress()
 	unsigned char released = 0;
 	unsigned char ASCII = 0;
 	KeyCode pressedKey = None;
-	unsigned char modifierBuffer = *((unsigned char *)KEYMOD);
+	unsigned char modifierBuffer = *keyboard_modifiers;
 
 	if (scanCode == SCANCODE_MOREINFO)
 	{
@@ -200,14 +193,16 @@ void handle_keypress()
 			ASCII = 0;
 
 	}
-	
-	KeyEvent * keyEvent = (KeyEvent *)KEYBUF;
-	keyEvent->ASCII = ASCII;
-	keyEvent->keyCode = pressedKey;
-	keyEvent->modifiers = modifierBuffer;
 
-	unsigned char * mod = (unsigned char *)KEYMOD;
-	*mod = modifierBuffer;
+
+	//The key event has not been consumed yet
+	modifierBuffer &= ~BUFMASK_CONSUMED;
+	
+	keyboard_buffer->ASCII = ASCII;
+	keyboard_buffer->keyCode = pressedKey;
+	keyboard_buffer->modifiers = modifierBuffer;
+
+	*keyboard_modifiers = modifierBuffer;
 }
 
 int configure_keyboard()
@@ -293,4 +288,16 @@ int configure_keyboard()
 
 
 	return 0;
+}
+
+char getch()
+{
+	volatile KeyEvent * event = keyboard_buffer;
+
+	//Wait until an ascii key has been pressed (and we haven't already consumed it)
+	while(!(!(event->modifiers & BUFMASK_CONSUMED) && event->ASCII != 0 && (event->modifiers & BUFMASK_PRESSED)));
+	//Consume the event
+	event->modifiers |= BUFMASK_CONSUMED;
+
+	return event->ASCII;
 }

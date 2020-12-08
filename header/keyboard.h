@@ -1,11 +1,8 @@
 #ifndef HEADER_keyboard
 #define HEADER_keyboard
 
-#ifndef HEADER_kernel
-#include "kernel.h"
-#endif
-
 #define BUFMASK_PRESSED 0x80
+#define BUFMASK_CONSUMED 0x40
 #define BUFMASK_LCTRL 0x20
 #define BUFMASK_RCTRL 0x10
 #define BUFMASK_LSHFT 0x08
@@ -16,13 +13,11 @@
 #define BUFMASK_SHFT (BUFMASK_LSHFT | BUFMASK_RSHFT)
 #define BUFMASK_ALT (BUFMASK_LALT | BUFMASK_RALT)
 
-//KeyEvent struct
-#define KEYBUF (0x00200000 + KERNEL_OFFSET)
-/** Buffer of held modifier keys:
-  * Bit  |   7    |6|  5  |  4  |  3 |  2 |  1 |  0
-  *       Pressed? 0 LCTRL RCTRL LSFT RSFT LALT RALT
+/** BUFMASK:
+  * Bit  |   7    |   6    |  5  |  4  |  3 |  2 |  1 |  0
+  *       Pressed? Consumed LCTRL RCTRL LSFT RSFT LALT RALT
   */
-#define KEYMOD (0x00200006 + KERNEL_OFFSET)
+
 
 typedef enum KeyCode
 {
@@ -43,8 +38,19 @@ typedef struct KeyEvent
 }__attribute__((packed)) KeyEvent;
 
 
+/** Parses scancodes into KeyEvents. Called when a keyboard interrupt is generated
+ *  Implemented in keyboard.c
+ */
 void handle_keypress();
 
+/** Simple hardware check and reset of the PS/2 Keyboard, enables scancode set 1
+ *  Implemented in keyboard.c
+ */
 int configure_keyboard();
+
+/** Blocks until an ASCII key is pressed
+ *  Implemented in keyboard.c
+ */
+char getch();
 
 #endif
