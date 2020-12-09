@@ -1,4 +1,4 @@
-#include "../header/pageframeallocator.h"
+#include "../header/paging.h"
 
 extern void pfa_bitmap(void);
 

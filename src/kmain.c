@@ -4,7 +4,7 @@
 #include "../header/interrupt.h"
 #include "../header/keyboard.h"
 #include "../header/kernel.h"
-#include "../header/pageframeallocator.h"
+#include "../header/paging.h"
 
 void setup_gdt(char * gdt_location);
 
