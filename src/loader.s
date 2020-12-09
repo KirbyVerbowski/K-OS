@@ -1,6 +1,5 @@
 global loader
 
-
 extern kernel_offset
 extern kernel_virtual_start
 extern kernel_virtual_end
@@ -25,6 +24,8 @@ KBD_BUFF_SIZE		equ 8
 section .bss
 	align 4096
 
+	global page_directory
+	global kernel_page_table
 	global pfa_bitmap
 
 	idt_start:
@@ -36,11 +37,11 @@ section .bss
 		resb (4096 - IDT_SIZE - GDT_MAXSIZE - KBD_BUFF_SIZE)		;Pad to 4k
 	page_directory:
 		resb PAGE_DIR_SIZE					; Reserve memory for the PDT
-	page_table_0:
+	kernel_page_table:
 		resb PAGE_TBL_SIZE					; Page table for the kernel
 	pfa_bitmap:
 	identity_temp_table:							
-		resb PAGE_TBL_SIZE						; Temporarily identity map the kernel
+		resb PAGE_TBL_SIZE						; Temporarily identity map the kernel for bootstrapping
 		resb (PFA_BITMAP_SIZE - PAGE_TBL_SIZE)  ; Since it is unmapped after paging is enabled
 												; We can reuse the memory for the PFA bitmap
 	kernel_stack:
@@ -141,7 +142,7 @@ section .text
 			add ebx, eax				; ebx now has the address where it should go
 
 			;Create the entry in eax
-			mov eax, page_table_0
+			mov eax, kernel_page_table
 			sub eax, kernel_offset
 			and eax, 0xFFFFF000
 			or  eax, 0x0000000B			; Set flags for this table (R/W, supervisor only, write-thru cache, 4KiB pages)
@@ -150,11 +151,11 @@ section .text
 			mov [ebx], eax
 			
 			;Now set up the page table that we just pointed to
-			mov ecx, page_table_0 + PAGE_TBL_SIZE	; Loop condition
+			mov ecx, kernel_page_table + PAGE_TBL_SIZE	; Loop condition
 			sub ecx, kernel_offset
 
 			mov eax, 0x0000000B			; Same flag settings as the directory table
-			mov ebx, page_table_0
+			mov ebx, kernel_page_table
 			sub ebx, kernel_offset
 		.fill_table_0:
 			mov [ebx], eax

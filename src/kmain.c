@@ -119,8 +119,15 @@ int kmain(char * kbd_buffer, char * idt_location, char * gdt_location)
 	char pframe[32];
 	//This will print the first available physical address which should be 0x00400000 since 
 	//the kernel and GRUB reside in a single page table
-	to_string(pframe, allocate_frame(), FORMAT_HEX_UPRCASE_PAD);
+	unsigned int paddr = allocate_frame();
+	to_string(pframe, paddr, FORMAT_HEX_UPRCASE_PAD);
 	puts(pframe);
+
+	map_page(0x00000000, paddr, 0, 1);
+	char * x = (char *)0;
+	*x = 0x69;
+
+
 	set_fb_cursor(0, y++);
 
 

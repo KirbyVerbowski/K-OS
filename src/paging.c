@@ -1,5 +1,8 @@
 #include "../header/paging.h"
 
+//Pointers to memory locations reserved during linking
+extern void kernel_page_table(void);
+extern void page_directory(void);
 extern void pfa_bitmap(void);
 
 void clear_pfa_bitmap(unsigned int kernel_physical_start, unsigned int kernel_pages)
@@ -63,4 +66,70 @@ unsigned int allocate_frame()
 	//TODO: handle this interrupt and swap a page frame to disk
 	asm("int 255");
 	return 0;
+}
+
+//Maps the page frame which contains paddr to the page containing vaddr
+void map_page(unsigned int vaddr, unsigned int paddr, int user_page, int readwrite)
+{
+	unsigned int * pdir = (unsigned int *)&page_directory;
+
+	//There is already a page directory entry present
+	if(pdir[vaddr >> 22] & PDE_PRESENT)
+	{
+		//Temporarily map the allocator frame to the page table we need to update
+		unsigned int * kernel_ptable = (unsigned int *)&kernel_page_table;
+		kernel_ptable[1023] = (pdir[vaddr >> 22] & PTE_ADDR) | PTE_PRESENT | PTE_CACHE_WRITETHRU | PTE_READWRITE;
+
+		//This is now a pointer to the table we need
+		unsigned int * ptable = (unsigned int *)ALLOCATOR_PAGE;
+
+		//Add the real entry
+		ptable[(vaddr >> 12) & 0x00000FFF] = (paddr & PTE_ADDR) | PTE_PRESENT | PTE_CACHE_WRITETHRU;
+		if(readwrite)
+			ptable[(vaddr >> 12) & 0x00000FFF] |= PTE_READWRITE;
+		if(user_page)
+			ptable[(vaddr >> 12) & 0x00000FFF] |= PTE_USERACCESS;
+
+		//Unmap the allocator frame
+		kernel_ptable[1023] = PTE_CACHE_WRITETHRU | PTE_READWRITE;
+	}
+	else
+	{
+		//Need to allocate a frame to hold the new page table
+		unsigned int new_ptable_physaddr = allocate_frame();
+
+		//We will temporarily map the allocator frame to get access to it
+		unsigned int * kernel_ptable = (unsigned int *)&kernel_page_table;
+		kernel_ptable[1023] = new_ptable_physaddr | PTE_PRESENT | PTE_CACHE_WRITETHRU | PTE_READWRITE;
+
+		//This is now a pointer to the frame holding the new page table
+		unsigned int * new_ptable = (unsigned int *)ALLOCATOR_PAGE;
+
+		//Set all entries empty and non-present
+		for(int i = 0 ; i < 1024; i++)
+		{
+			new_ptable[i] = PTE_CACHE_WRITETHRU | PTE_READWRITE;
+			if(readwrite)
+				new_ptable[i] |= PTE_READWRITE;
+			if(user_page)
+				new_ptable[i] |= PTE_USERACCESS;
+		}
+		//Add the real entry
+		new_ptable[(vaddr >> 12) & 0x00000FFF] = (paddr & PTE_ADDR) | PTE_PRESENT | PTE_CACHE_WRITETHRU;
+		if(readwrite)
+			new_ptable[(vaddr >> 12) & 0x00000FFF] |= PTE_READWRITE;
+		if(user_page)
+			new_ptable[(vaddr >> 12) & 0x00000FFF] |= PTE_USERACCESS;
+
+		//Make a page directory entry to point to the table
+		pdir[vaddr >> 22] = (new_ptable_physaddr & PTE_ADDR) | PDE_PRESENT | PDE_CACHE_WRITETHRU;
+		if(readwrite)
+			pdir[vaddr >> 22] |= PDE_READWRITE;
+		if(user_page)
+			pdir[vaddr >> 22] |= PDE_USERACCESS;
+
+		//Unmap the allocator frame
+		kernel_ptable[1023] = PTE_CACHE_WRITETHRU | PTE_READWRITE;
+	}
+	
 }
