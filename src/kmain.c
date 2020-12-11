@@ -5,8 +5,10 @@
 #include "../header/keyboard.h"
 #include "../header/kernel.h"
 #include "../header/paging.h"
+#include "../header/heap.h"
 
 void setup_gdt(char * gdt_location);
+
 
 KeyEvent * keyboard_buffer;
 char * keyboard_modifiers;
@@ -117,18 +119,36 @@ int kmain(char * kbd_buffer, char * idt_location, char * gdt_location)
 	set_fb_cursor(0, y++);
 
 	char pframe[32];
-	//This will print the first available physical address which should be 0x00400000 since 
-	//the kernel and GRUB reside in a single page table
-	unsigned int paddr = allocate_frame();
-	to_string(pframe, paddr, FORMAT_HEX_UPRCASE_PAD);
+	pframe[0] = pframe[0];
+
+	// for(int i = 0; i < 20; i++)
+	// {
+	// 	unsigned int paddr = allocate_frame();
+	// 	to_string(pframe, paddr, FORMAT_HEX_UPRCASE_PAD);
+	// 	puts(pframe);
+	// 	map_page(paddr, paddr, 0, 1);
+	// 	set_fb_cursor(0, y++);
+	// 	if(y == FB_ROWS)
+	// 		y = 0;
+	// 	//map_page(paddr, paddr, 0, 1);
+	// }
+
+	char * dynamicArray = (char *)malloc(50);
+	to_string(pframe, (unsigned int)dynamicArray, FORMAT_HEX_UPRCASE_PAD);	
 	puts(pframe);
-
-	map_page(0x00000000, paddr, 0, 1);
-	char * x = (char *)0;
-	*x = 0x69;
-
-
 	set_fb_cursor(0, y++);
+
+	char * other = (char *)malloc(25);
+	to_string(pframe, (unsigned int)other, FORMAT_HEX_UPRCASE_PAD);	
+	puts(pframe);
+	set_fb_cursor(0, y++);
+	
+	
+	free(dynamicArray);
+
+	char * newArr = (char *)malloc(12);
+	to_string(pframe, (unsigned int)newArr, FORMAT_HEX_UPRCASE_PAD);	
+	puts(pframe);
 
 
 

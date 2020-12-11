@@ -51,6 +51,17 @@ void puts(char* c)
 	char cur;	
 	while((cur = *(c++)) != '\0')
 	{
-		putch(cur);
+		if(cur == '\n')
+		{
+			short curs = get_fb_cursor();
+			char x = (char)(curs % FB_ROWS);
+			char y = (char)((curs - x) / FB_ROWS);
+			set_fb_cursor(0, (y+1) % FB_ROWS);
+		}
+		else
+		{
+			putch(cur);
+		}
+
 	}
 }

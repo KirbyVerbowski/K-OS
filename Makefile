@@ -1,4 +1,5 @@
-OBJECTS = src/loader.o src/kmain.o src/io.o src/framebuffer_c.o src/framebuffer_s.o src/string.o src/interrupt_setup.o src/interrupt.o src/interrupt_handler.o src/keyboard.o src/paging.o
+OBJECTS = src/loader.o src/kmain.o src/io.o src/framebuffer_c.o src/framebuffer_s.o src/string.o src/interrupt_setup.o src/interrupt.o \
+ src/interrupt_handler.o src/keyboard.o src/paging.o src/heap.o
 CC = gcc
 CFLAGS = -m32 -masm=intel -nostdlib -nostdinc -fno-pic -fno-builtin -fno-stack-protector \
 		 -nostartfiles -nodefaultlibs -Wall -Wextra -Werror -c

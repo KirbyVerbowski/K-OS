@@ -15,7 +15,6 @@ IDT_SIZE			equ 2048				; Bytes allocated for the IDT
 PAGE_DIR_SIZE		equ 4096				; Bytes allocated for the Page directory table
 PAGE_TBL_SIZE		equ 4096				; Bytes allocated for a page table
 PFA_BITMAP_SIZE		equ 0x20000				; 132K needed = (0x1 0000 0000 addr. bytes) / (0x1000 byte page frames) / (0x8 bits in a byte)
-KBD_BUFF_SIZE		equ 8
 
 ;
 ;	Sometimes there is a boot error when setting the GDT. Rebooting seems to fix the issue
@@ -32,9 +31,7 @@ section .bss
 		resb IDT_SIZE						; Reserve memory for the IDT		
 	gdt_start:
 		resb GDT_MAXSIZE					; Reserve memory for the GDT (unused currently)
-	kbd_buffer:
-		resb KBD_BUFF_SIZE
-		resb (4096 - IDT_SIZE - GDT_MAXSIZE - KBD_BUFF_SIZE)		;Pad to 4k
+		resb (4096 - IDT_SIZE - GDT_MAXSIZE) 		;Pad to 4k
 	page_directory:
 		resb PAGE_DIR_SIZE					; Reserve memory for the PDT
 	kernel_page_table:
@@ -46,6 +43,17 @@ section .bss
 												; We can reuse the memory for the PFA bitmap
 	kernel_stack:
 		resb KERNEL_STACK_SIZE				; Reserve memory for stack
+
+section .data
+	align 4
+
+	global heap_head
+	global heap_tail
+
+	kbd_buffer: dq 0x0000000000000000
+	heap_head: dd 0x00000000
+	heap_tail: dd 0x00000000
+
 
 
 section .text                
