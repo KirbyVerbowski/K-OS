@@ -38,7 +38,7 @@ The bootstrapping process is nearly complete. Features include:
 
 Next up:
 - Method for swapping pages on task switch
-- Create a TCB struct
+- Create a PCB struct
 - Configure serial port(s) to stream binary data in
 - Dynamically load and run a user level C program cross compiled to ELF binary
 - Make a scheduler 
